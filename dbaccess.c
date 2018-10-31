@@ -65,12 +65,15 @@ void
 apex_rrset_checks(namedb_type* db, rrset_type* rrset, domain_type* domain)
 {
 	uint32_t soa_minimum;
+	uint32_t serial;
 	unsigned i;
 	zone_type* zone = rrset->zone;
 	assert(domain == zone->apex);
 	(void)domain;
 	if (rrset_rrtype(rrset) == TYPE_SOA) {
 		zone->soa_rrset = rrset;
+		memcpy(&serial, rdata_atom_data(rrset->rrs->rdatas[2]), rdata_atom_size(rrset->rrs->rdatas[2]));
+		zone->serial = serial;
 
 		/* BUG #103 add another soa with a tweaked ttl */
 		if(zone->soa_nx_rrset == 0) {
@@ -258,6 +261,7 @@ namedb_zone_create(namedb_type* db, const dname_type* dname,
 	zone->apex->usage++; /* the zone.apex reference */
 	zone->apex->is_apex = 1;
 	zone->soa_rrset = NULL;
+	zone->serial = 0;
 	zone->soa_nx_rrset = NULL;
 	zone->ns_rrset = NULL;
 #ifdef NSEC3

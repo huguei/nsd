@@ -36,6 +36,7 @@
 #include "options.h"
 #include "nsec3.h"
 #include "tsig.h"
+#include "xfrd-notify.h"
 
 /* [Bug #253] Adding unnecessary NS RRset may lead to undesired truncation.
  * This function determines if the final response packet needs the NS RRset
@@ -1532,6 +1533,15 @@ query_add_optional(query_type *q, nsd_type *nsd)
 				buffer_write(q->packet, edns->nsid, OPT_HDR);
 				/* nsid payload */
 				buffer_write(q->packet, nsd->nsid, nsd->nsid_len);
+			}
+			if(q->edns.rrserial) {
+				buffer_write(q->packet, edns->rrserial, OPT_HDR);
+				if (RCODE(q->packet) == RCODE_REFUSE) {
+					buffer_write_u32(q->packet, 0);
+				}
+				else if (q->zone && q->zone->serial) {
+					buffer_write_u32(q->packet, htonl(q->zone->serial));
+				}
 			}
 		}
 		ARCOUNT_SET(q->packet, ARCOUNT(q->packet) + 1);

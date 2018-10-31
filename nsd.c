@@ -752,8 +752,10 @@ main(int argc, char *argv[])
 		}
 	}
 	edns_init_nsid(&nsd.edns_ipv4, nsd.nsid_len);
+	edns_init_rrserial(&nsd.edns_ipv4, 4);
 #if defined(INET6)
 	edns_init_nsid(&nsd.edns_ipv6, nsd.nsid_len);
+	edns_init_rrserial(&nsd.edns_ipv6, 4);
 #endif /* defined(INET6) */
 
 	/* Number of child servers to fork.  */

@@ -126,6 +126,7 @@ struct zone
 	domain_type* apex;
 	rrset_type*  soa_rrset;
 	rrset_type*  soa_nx_rrset; /* see bug #103 */
+	uint32_t     serial;
 	rrset_type*  ns_rrset;
 #ifdef NSEC3
 	rr_type* nsec3_param; /* NSEC3PARAM RR of chain in use or NULL */

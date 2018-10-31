@@ -50,6 +50,20 @@ edns_init_nsid(edns_data_type *data, uint16_t nsid_len)
 }
 
 void
+edns_init_rrserial(edns_data_type *data, uint16_t rrserial_len)
+{
+       /* add rrserial length bytes */
+       data->rdata_rrserial[0] = ((OPT_HDR + rrserial_len) & 0xff00) >> 8; /* length_hi */
+       data->rdata_rrserial[1] = ((OPT_HDR + rrserial_len) & 0x00ff);      /* length_lo */
+
+       /* RRSERIAL OPT HDR */
+       data->rrserial[0] = (RRSERIAL_CODE & 0xff00) >> 8;
+       data->rrserial[1] = (RRSERIAL_CODE & 0x00ff);
+       data->rrserial[2] = (rrserial_len & 0xff00) >> 8;
+       data->rrserial[3] = (rrserial_len & 0x00ff);
+}
+
+void
 edns_init_record(edns_record_type *edns)
 {
 	edns->status = EDNS_NOT_PRESENT;
@@ -58,6 +72,7 @@ edns_init_record(edns_record_type *edns)
 	edns->opt_reserved_space = 0;
 	edns->dnssec_ok = 0;
 	edns->nsid = 0;
+	edns->rrserial = 0;
 }
 
 /** handle a single edns option in the query */
@@ -80,6 +95,11 @@ edns_handle_option(uint16_t optcode, uint16_t optlen, buffer_type* packet,
 			/* ignore option */
 			buffer_skip(packet, optlen);
 		}
+		break;
+	case RRSERIAL_CODE:
+		edns->rrserial = 1;
+		buffer_skip(packet, optlen);
+		edns->opt_reserved_space += OPT_HDR + 4;
 		break;
 	default:
 		buffer_skip(packet, optlen);
