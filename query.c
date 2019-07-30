@@ -1534,14 +1534,9 @@ query_add_optional(query_type *q, nsd_type *nsd)
 				/* nsid payload */
 				buffer_write(q->packet, nsd->nsid, nsd->nsid_len);
 			}
-			if(q->edns.rrserial) {
+			if(q->edns.rrserial && (RCODE(q->packet) == RCODE_OK) && q->zone && q->zone->serial) {
 				buffer_write(q->packet, edns->rrserial, OPT_HDR);
-				if (RCODE(q->packet) == RCODE_REFUSE) {
-					buffer_write_u32(q->packet, 0);
-				}
-				else if (q->zone && q->zone->serial) {
-					buffer_write_u32(q->packet, htonl(q->zone->serial));
-				}
+				buffer_write_u32(q->packet, htonl(q->zone->serial));
 			}
 		}
 		ARCOUNT_SET(q->packet, ARCOUNT(q->packet) + 1);
